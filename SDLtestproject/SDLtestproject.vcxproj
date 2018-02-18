@@ -147,7 +147,6 @@
   <ItemGroup>
     <ClCompile Include="core.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ObjectHandler.cpp" />
     <ClCompile Include="Vector2D.cpp" />
   </ItemGroup>
   <ItemGroup>

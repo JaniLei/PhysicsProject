@@ -89,13 +89,13 @@ int core::init()
 	//texture = LoadTexture("texturetest.png");
 
 	earth = new Obj;
-	ObjInit(earth, 10, 10, 100, 100, "texturetest.png");
+	ObjInit(earth, 10, 10, 100, 100, "earth.png");
 	objs.objects[objs.freeIndex] = earth;
 	objs.freeIndex++; objs.objNum++;
 	physObjs.push_back(earth);
 
 	sun = new Obj;
-	ObjInit(sun, (int)(WINDOW_WIDTH/2) - 100, (int)(WINDOW_HEIGHT / 2) - 100, 200, 200, "texturetest.png");
+	ObjInit(sun, (int)(WINDOW_WIDTH/2) - 100, (int)(WINDOW_HEIGHT / 2) - 100, 200, 200, "sun.png");
 	objs.objects[objs.freeIndex] = sun;
 	objs.freeIndex++; objs.objNum++;
 
