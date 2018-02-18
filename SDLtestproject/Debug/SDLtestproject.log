@@ -1,0 +1,5 @@
+﻿  core.cpp
+c:\users\jampp\desktop\physicscourseproject-master\sdltestproject\core.cpp(273): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\jampp\desktop\physicscourseproject-master\sdltestproject\core.cpp(280): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+  SDLtestproject.vcxproj -> C:\Users\jampp\Desktop\PhysicsCourseProject-master\Debug\SDLtestproject.exe
+  SDLtestproject.vcxproj -> C:\Users\jampp\Desktop\PhysicsCourseProject-master\Debug\SDLtestproject.pdb (Full PDB)
