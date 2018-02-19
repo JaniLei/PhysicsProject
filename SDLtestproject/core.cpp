@@ -8,15 +8,14 @@
 #include <vector>
 
 
-#define WINDOW_WIDTH  1000
-#define WINDOW_HEIGHT 700
+#define WINDOW_WIDTH  1500
+#define WINDOW_HEIGHT 1000
 
 unsigned int lastTime = 0, currentTime;
 
 
 static SDL_Window* window;
 static SDL_Renderer* renderer;
-//static SDL_Texture* texture;
 
 SDL_Texture* LoadTexture(std::string path);
 
@@ -44,21 +43,19 @@ struct ObjPool
 void ObjInit(Obj* object, int _x, int _y, int _w, int _h, std::string imgPath);
 void ObjDraw(Obj* object);
 void DrawObjects(ObjPool* objs);
-void ObjMove(Obj* object);
+void ObjMove(Obj* object, double dt);
 
 ObjPool objs;
 
-Obj* earth;
-Obj* sun;
-Obj* test;
-
 std::vector<Obj*> physObjs;
 
-void Gravitation(Obj* obj);
+void Gravitation(Obj* obj, double dt);
 double DistanceInPx(Obj* obj1, Obj* obj2);
 
 double ratio;
 
+std::vector<Vector2D> trail;
+void DrawTrail();
 
 int core::init()
 {
@@ -86,35 +83,38 @@ int core::init()
 
 	// game objects etc
 
-	//texture = LoadTexture("texturetest.png");
-
-	earth = new Obj;
-	ObjInit(earth, 10, 10, 100, 100, "earth.png");
+	Obj* earth = new Obj;
+	ObjInit(earth, 200, 200, 50, 50, "earth.png");
 	objs.objects[objs.freeIndex] = earth;
 	objs.freeIndex++; objs.objNum++;
 	physObjs.push_back(earth);
 
-	sun = new Obj;
+	Obj* sun = new Obj;
 	ObjInit(sun, (int)(WINDOW_WIDTH/2) - 100, (int)(WINDOW_HEIGHT / 2) - 100, 200, 200, "sun.png");
 	objs.objects[objs.freeIndex] = sun;
 	objs.freeIndex++; objs.objNum++;
+	physObjs.push_back(sun);
 
-	test = new Obj;
-	ObjInit(test, 800, 50, 100, 100, "texturetest.png");
+
+	Obj* test = new Obj;
+	ObjInit(test, 600, 200, 40, 40, "earth.png");
 	objs.objects[objs.freeIndex] = test;
 	objs.freeIndex++; objs.objNum++;
 	physObjs.push_back(test);
 	
-	//earth->physics = new PhysicsComp{ 5.974f*powf(10, 24), 29800 };
-	//sun->physics = new PhysicsComp{ 333000 * (5.974f*powf(10, 24)), 0 };
+	earth->physics = new PhysicsComp{ 5.974f*powf(10, 24), Vector2D(1.4f, -2.2f) };
+	sun->physics = new PhysicsComp{ 333000 * (5.974f*powf(10, 24)), Vector2D(0, 0) };
+	test->physics = new PhysicsComp{ 5.774f*powf(10, 24), Vector2D(2.8f, -2.5f) };
 
-	earth->physics = new PhysicsComp{ 1, Vector2D(-0.6f, 2) };
-	sun->physics = new PhysicsComp{ 333000 * earth->physics->mass, Vector2D(0, 0) };
-	test->physics = new PhysicsComp{ 2.5f, Vector2D(0.3f, 1.0f) };
+
+	//earth->physics = new PhysicsComp{ 1, Vector2D(-0.6f, 1.5f) };
+	//sun->physics = new PhysicsComp{ 333000 * earth->physics->mass, Vector2D(0, 0) };
+	//test->physics = new PhysicsComp{ 2.5f, Vector2D(0.3f, 1.0f) };
 
 	std::cout << DistanceInPx(earth, sun) << std::endl;
 
-	ratio = DistanceInPx(earth, sun) / 0.05f; //385000;
+	ratio = 149600000 / DistanceInPx(earth, sun);
+	//ratio = DistanceInPx(earth, sun) / 0.05f; //385000;
 	std::cout << "ratio: " << ratio << std::endl;
 
 	return 0;
@@ -132,12 +132,9 @@ int core::update()
 		currentTime = SDL_GetTicks();
 		if (currentTime > lastTime + 10)
 		{
-			//Gravitation(earth);
-			//Gravitation(test);
-			//std::cout << DistanceInPx(earth, sun) << std::endl;
 			for (size_t i = 0; i < physObjs.size(); i++)
 			{
-				Gravitation(physObjs[i]);
+				Gravitation(physObjs[i], 1);
 			}
 			lastTime = currentTime;
 		}
@@ -175,16 +172,18 @@ int core::update()
 			case SDLK_p:
 				printf("asd\n");
 				//ObjMove(earth);
-				std::cout << DistanceInPx(earth, sun) << std::endl;
 				break;
 			}
 		}
 
 		// rendering
 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
 		SDL_RenderClear(renderer);
 
 		DrawObjects(&objs);
+		//DrawTrail();
 
 		SDL_RenderPresent(renderer);
 	}
@@ -194,7 +193,6 @@ int core::update()
 
 int core::cleanUp()
 {
-	//SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 
@@ -237,6 +235,15 @@ void ObjInit(Obj* object, int _x, int _y, int _w, int _h, std::string imgPath)
 
 }
 
+void DrawTrail()
+{
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	for (size_t i = 0; i < trail.size(); i++)
+	{
+		SDL_RenderDrawPoint(renderer, trail[i].x, trail[i].y);
+	}
+}
+
 void ObjDraw(Obj* object)
 {
 	SDL_Rect _r
@@ -256,31 +263,36 @@ void DrawObjects(ObjPool* objs)
 	}
 }
 
-void ObjMove(Obj* object)
+void ObjMove(Obj* object, double dt)
 {
-	object->position = object->position + object->physics->velocity;
+	object->position = object->position + object->physics->velocity * dt;
 	object->x = (int)object->position.x - (int)(object->w/2);
 	object->y = (int)object->position.y - (int)(object->h / 2);
+
+	//trail.push_back(Vector2D(object->position.x, object->position.y));
 }
 
-void Gravitation(Obj* obj)
+void Gravitation(Obj* obj, double dt)
 {
-	double gF; // gravitational force
-	double y = 6.67428f * powf(10, -11); // gravitational constant
-	double distance = DistanceInPx(obj, sun) / ratio;
-	//std::cout << "distance: " << distance << std::endl;
+	for (size_t i = 0; i < objs.objNum; i++)
+	{
+		Obj* other = objs.objects[i];
+		if (other != obj)
+		{
+			double gF; // gravitational force
+			double y = 6.67428f * powf(10, -11); // gravitational constant
+			double distance = DistanceInPx(obj, other) * ratio;
 
-	gF = y*(sun->physics->mass * obj->physics->mass / powf(distance, 2));
+			gF = y*(other->physics->mass * obj->physics->mass / powf(distance, 2));
+			double accel = gF / obj->physics->mass;
+			Vector2D direction = other->position - obj->position;
+			direction.Normalize();
+			Vector2D newVelocity = obj->physics->velocity + (direction * (accel * dt / ratio));
+			obj->physics->velocity = newVelocity;
 
-	//std::cout << "gravitational force: " << gF << std::endl;
-
-	double accel = gF / obj->physics->mass;
-	Vector2D direction = sun->position - obj->position;
-	direction.Normalize();
-	Vector2D newVelocity = obj->physics->velocity + (direction * accel);
-	obj->physics->velocity = newVelocity;
-
-	ObjMove(obj);
+			ObjMove(obj, dt);
+		}
+	}
 }
 
 double DistanceInPx(Obj* obj1, Obj* obj2)

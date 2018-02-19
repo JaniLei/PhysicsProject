@@ -1,3 +1,7 @@
-﻿     Creating library C:\Users\Jani\Desktop\dev\Projects\PhysicsProject\Debug\SDLtestproject.lib and object C:\Users\Jani\Desktop\dev\Projects\PhysicsProject\Debug\SDLtestproject.exp
-  SDLtestproject.vcxproj -> C:\Users\Jani\Desktop\dev\Projects\PhysicsProject\Debug\SDLtestproject.exe
-  SDLtestproject.vcxproj -> C:\Users\Jani\Desktop\dev\Projects\PhysicsProject\Debug\SDLtestproject.pdb (Full PDB)
+﻿  core.cpp
+c:\users\janilei1\desktop\physicsproject\sdltestproject\core.cpp(243): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+c:\users\janilei1\desktop\physicsproject\sdltestproject\core.cpp(268): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+c:\users\janilei1\desktop\physicsproject\sdltestproject\core.cpp(277): warning C4018: '<': signed/unsigned mismatch
+c:\users\janilei1\desktop\physicsproject\sdltestproject\core.cpp(286): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\janilei1\desktop\physicsproject\sdltestproject\core.cpp(290): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+  SDLtestproject.vcxproj -> C:\Users\janilei1\Desktop\PhysicsProject\Debug\SDLtestproject.exe
